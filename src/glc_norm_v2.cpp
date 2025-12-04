@@ -55,7 +55,7 @@ static void remove_epsilon(Grammar &G, Logger &log) {
         G.V.insert(S0);
         // add S0 -> originalStart and S0 -> &
         G.P[S0].push_back(RHS{ originalStart });
-        G.P[S0].push_back(RHS());
+        G.P[S0].push_back(RHS{"&"});
         G.S = S0;
         log.info("Start era nullable: criado novo start '" + S0 + "' com " + S0 + "->" + originalStart + " e " + S0 + "->&");
     }

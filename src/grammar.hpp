@@ -12,6 +12,9 @@ using Symbol = string;
 using RHS = vector<Symbol>;
 using Productions = map<Symbol, vector<RHS>>;
 
+
+
+
 struct Grammar {
     set<Symbol> V; // nao-terminais
     set<Symbol> T; // terminais

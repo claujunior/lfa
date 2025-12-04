@@ -1,6 +1,16 @@
 #include "io_handling.hpp"
 
-
+Logger::Logger(const string &fname) {
+    out.open(fname);
+    if (!out) throw runtime_error("Não foi possível criar log em " + fname);
+}
+void Logger::snapshot(const string &title, const Grammar &G) {
+    out << "==== [" << title << "] ====\n";
+    out << grammar_to_string(G) << "\n\n";
+}
+void Logger::info(const string &s) {
+    out << s << "\n";
+}
 
 // Tolerant: accepts accents, multiple lines, automatic additions with warnings.
 /// @brief Robust parser for the format with blocks: Variaveis = {...}, Alfabeto = {...}, Inicial = X, Regras: A -> A01B | & 

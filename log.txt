@@ -1,54 +1,62 @@
 ==== [Gramática original] ====
 Start: S
-A -> 0 1 | 1 B 1
-B -> B B A A | C 0 1 0 1 | B 1 1 | &
-C -> C 1 0 A | B C
-S -> A 0 1 B C | &
+A -> 0
+B -> B C
+C -> A B | &
+S -> A B | C A
+
 
 Remoção de regras-ε: início.
 Variáveis nulas (nullable):
-  B
-  S
-Start era nullable: criado novo start 'S_S0_1' com S_S0_1->S e S_S0_1->&
+  C
 Remoção de regras-ε: finalizada.
 ==== [Após remoção de ε-productions] ====
-Start: S_S0_1
-A -> 0 1 | 1 1 | 1 B 1
-B -> 1 1 | A A | B 1 1 | B A A | B B A A | C 0 1 0 1
-C -> B C | C 1 0 A
-S -> A 0 1 B C | A 0 1 C
-S_S0_1 -> S
+Start: S
+A -> 0
+B -> B C
+C -> A B
+S -> A | A B | C A
+
 
 Remoção de unit-productions: início.
 Remoção de unit-productions: finalizada.
 ==== [Após remoção de unit-productions] ====
-Start: S_S0_1
-A -> 0 1 | 1 1 | 1 B 1
-B -> 1 1 | A A | B 1 1 | B A A | B B A A | C 0 1 0 1
-C -> B C | C 1 0 A
-S -> A 0 1 B C | A 0 1 C
-S_S0_1 -> A 0 1 B C | A 0 1 C
+Start: S
+A -> 0
+B -> B C
+C -> A B
+S -> 0 | A B | C A
+
 
 Remoção de símbolos inúteis: início.
 Geradores:
   A
-  B
+  S
 Alcançáveis:
-  S_S0_1
+  S
 Remoção de símbolos inúteis: finalizada.
 ==== [Após remoção de símbolos inúteis] ====
-Start: S_S0_1
+Start: S
+S -> 0
+
 
 Ordem de nao-terminais usada para GNF:
+  S
 Substituições por ordem concluídas (iterações = 1).
 ==== [Após substituições iniciais para GNF] ====
-Start: S_S0_1
+Start: S
+S -> 0
+
 
 ==== [Após eliminação de recursão à esquerda (tentaiva)] ====
-Start: S_S0_1
+Start: S
+S -> 0
+
 
 Todas as produções começam por terminal: GNF alcançada (prático).
 ==== [Gramática pós-processada tentativa GNF] ====
-Start: S_S0_1
+Start: S
+S -> 0
+
 
 NORMALIZACAO: GNF (tentativa) finalizada. Revise o log.
