@@ -1,101 +1,68 @@
 ==== [Gramática original] ====
 Start: S
-A -> B 'a' D | 'c' C | B | &
-B -> B 'b' D | C B
-C -> 'a' A | 'b' B D
-D -> 'c' A | A
-S -> A 'a' A | 'b' B
+A -> '0' '1' | '1' B '1'
+B -> B B A A | C '0' '1' '0' '1' | B '1' '1' | &
+C -> C '1' '0' A | B C
+S -> A '0' '1' B C | &
 
 
 Remoção de regras-ε: início.
 Variáveis nulas (nullable):
-  A
-  D
+  B
+  S
+Start era nullable: criado novo start 'S_S0_1' com S_S0_1->S e S_S0_1->&
 Remoção de regras-ε: finalizada.
 ==== [Após remoção de ε-productions] ====
-Start: S
-A -> B | B 'a' | B 'a' D | 'c' C
-B -> B 'b' | B 'b' D | C B
-C -> 'a' | 'a' A | 'b' B | 'b' B D
-D -> A | 'c' | 'c' A
-S -> A 'a' | A 'a' A | 'a' | 'a' A | 'b' B
+Start: S_S0_1
+A -> '0' '1' | '1' '1' | '1' B '1'
+B -> '1' '1' | A A | B '1' '1' | B A A | B B A A | C '0' '1' '0' '1'
+C -> B C | C '1' '0' A
+S -> A '0' '1' B C | A '0' '1' C
+S_S0_1 -> '&' | S
 
 
 Remoção de unit-productions: início.
 Remoção de unit-productions: finalizada.
 ==== [Após remoção de unit-productions] ====
-Start: S
-A -> B 'a' | B 'a' D | B 'b' | B 'b' D | C B | 'c' C
-B -> B 'b' | B 'b' D | C B
-C -> 'a' | 'a' A | 'b' B | 'b' B D
-D -> B 'a' | B 'a' D | B 'b' | B 'b' D | C B | 'c' | 'c' A | 'c' C
-S -> A 'a' | A 'a' A | 'a' | 'a' A | 'b' B
+Start: S_S0_1
+A -> '0' '1' | '1' '1' | '1' B '1'
+B -> '1' '1' | A A | B '1' '1' | B A A | B B A A | C '0' '1' '0' '1'
+C -> B C | C '1' '0' A
+S -> A '0' '1' B C | A '0' '1' C
+S_S0_1 -> '&' | A '0' '1' B C | A '0' '1' C
 
 
 Remoção de símbolos inúteis: início.
 Geradores:
   A
-  C
-  D
-  S
+  B
+  S_S0_1
 Alcançáveis:
-  A
-  C
-  S
+  S_S0_1
 Remoção de símbolos inúteis: finalizada.
 ==== [Após remoção de símbolos inúteis] ====
-Start: S
-A -> 'c' C
-C -> 'a' | 'a' A
-S -> A 'a' | A 'a' A | 'a' | 'a' A
+Start: S_S0_1
+S_S0_1 -> '&'
 
 
 Substituição de terminais em produções longas: início.
 Substituição de terminais em produções longas: finalizada.
 ==== [Após substituição de terminais em produções longas] ====
-Start: S
-A -> T_1 C
-C -> 'a' | T_2 A
-S -> A T_2 | A T_2 A | 'a' | T_2 A
-T_1 -> 'c'
-T_2 -> 'a'
+Start: S_S0_1
+S_S0_1 -> '&'
 
 
-Início do processo prático para GNF (Greibach Normal Form - Forma Normal de Greibach).
-
-Ordem de nao-terminais usada para GNF:
-  S
-  A
-  C
-  T_1
-  T_2
-Substituições por ordem concluídas (iterações = 1).
-==== [Após substituições iniciais para GNF] ====
-Start: S
-A -> T_1 C
-C -> T_2 A | 'a'
-S -> A T_2 | A T_2 A | T_2 A | 'a'
-T_1 -> 'c'
-T_2 -> 'a'
+Binarização: início.
+Binarização: finalizada.
+==== [Após binarização (CNF-ready)] ====
+Start: S_S0_1
+S_S0_1 -> '&'
 
 
-==== [Após eliminação de recursão à esquerda (tentaiva)] ====
-Start: S
-A -> T_1 C
-C -> T_2 A | 'a'
-S -> A T_2 | A T_2 A | T_2 A | 'a'
-T_1 -> 'c'
-T_2 -> 'a'
+CNF: etapas concluídas.
+==== [Gramática em (aproximação de) CNF] ====
+Start: S_S0_1
+S_S0_1 -> '&'
 
 
-ATENÇÃO: Não foi possível garantir que todas as produções iniciem por terminal automaticamente (caso complexo).
-==== [Gramática pós-processada tentativa GNF] ====
-Start: S
-A -> T_1 C
-C -> T_2 A | 'a'
-S -> A T_2 | A T_2 A | T_2 A | 'a'
-T_1 -> 'c'
-T_2 -> 'a'
-
-
-NORMALIZACAO: GNF (tentativa) finalizada. Revise o log.
+NORMALIZACAO: CNF finalizada.

@@ -9,12 +9,6 @@
 
 using namespace std;
 
-static bool isNonTerminal(const Symbol &s) {
-    if (s.empty()) return false;
-    // Convenção: começa com letra maiúscula = não-terminal
-    return isupper((unsigned char)s[0]);
-}
-
 
 // Compute nullable set
 static set<Symbol> compute_nullable(const Grammar &G) {
@@ -29,7 +23,7 @@ static set<Symbol> compute_nullable(const Grammar &G) {
                 if (rhs.empty()) { nullable.insert(A); changed=true; break; }
                 bool allnull=true;
                 for (auto &X : rhs) {
-                    if (!isNonTerminal(X) || !nullable.count(X)) { allnull=false; break; }
+                    if (G.isTerminal(X) || !nullable.count(X)) { allnull=false; break; }
                 }
                 if (allnull) { nullable.insert(A); changed=true; break; }
             }
@@ -77,7 +71,7 @@ static void remove_epsilon(Grammar &G, Logger &log) {
             // find positions that are nullable
             vector<int> nullablePos;
             for (size_t i=0;i<rhs.size();++i) {
-                if (isNonTerminal(rhs[i]) && nullable.count(rhs[i])) nullablePos.push_back((int)i);
+                if (!G.isTerminal(rhs[i]) && nullable.count(rhs[i])) nullablePos.push_back((int)i);
             }
             // enumerate subsets of nullable positions
             int m = (int)nullablePos.size();
@@ -134,7 +128,7 @@ static void remove_unit_productions(Grammar &G, Logger &log) {
             for (auto &B : vector<Symbol>(closure[A].begin(), closure[A].end())) {
                 if (!G.P.count(B)) continue;
                 for (auto &rhs : G.P[B]) {
-                    if (rhs.size() == 1 && isNonTerminal(rhs[0])) {
+                    if (rhs.size() == 1 && !G.isTerminal(rhs[0])) {
                         if (!closure[A].count(rhs[0])) { closure[A].insert(rhs[0]); changed = true; }
                     }
                 }
@@ -147,7 +141,7 @@ static void remove_unit_productions(Grammar &G, Logger &log) {
         for (auto &B : closure[A]) {
             if (!G.P.count(B)) continue;
             for (auto &rhs : G.P[B]) {
-                if (rhs.size() == 1 && isNonTerminal(rhs[0])) continue;
+                if (rhs.size() == 1 && !G.isTerminal(rhs[0])) continue;
                 acc.insert(rhs);
             }
         }
@@ -243,7 +237,7 @@ static void replace_terminals_in_long_productions(Grammar &G, Logger &log) {
         for (auto &rhs : G.P[A]) {
             if (rhs.size() >= 2) {
                 for (auto &X : rhs) {
-                    if (!isNonTerminal(X)) {
+                    if (G.isTerminal(X)) {
                         if (!termVar.count(X)) {
                             Symbol Vn;
                             do { Vn = "T_" + to_string(++cnt); } while (G.V.count(Vn));
@@ -260,7 +254,7 @@ static void replace_terminals_in_long_productions(Grammar &G, Logger &log) {
     for (auto &A : vector<Symbol>(G.V.begin(), G.V.end())) {
         for (auto &rhs : newP[A]) {
             if (rhs.size() >= 2) {
-                for (auto &X : rhs) if (!isNonTerminal(X)) X = termVar[X];
+                for (auto &X : rhs) if (G.isTerminal(X)) X = termVar[X];
             }
         }
     }
@@ -358,7 +352,7 @@ static void to_gnf(Grammar &G, Logger &log) {
                 Symbol first = rhs[0];
                 // if first is nonterminal that appears BEFORE A in order, substitute
                 auto pos = find(order.begin(), order.begin()+i, first);
-                if (isNonTerminal(first) && pos != order.begin()+i) {
+                if (!G.isTerminal(first) && pos != order.begin()+i) {
                     // substitute first with its productions
                     if (!G.P.count(first)) { newRhs.push_back(rhs); continue; }
                     for (auto &beta : G.P[first]) {
@@ -416,9 +410,9 @@ static void to_gnf(Grammar &G, Logger &log) {
     for (auto &A : G.V) {
         for (auto &rhs : G.P[A]) {
             if (rhs.empty()) continue;
-            if (isNonTerminal(rhs[0])) {
+            if (!G.isTerminal(rhs[0])) {
                 bool replaced = false;
-                for (auto &x : G.P[rhs[0]]) if (!x.empty() && !isNonTerminal(x[0])) replaced = true;
+                for (auto &x : G.P[rhs[0]]) if (!x.empty() && G.isTerminal(x[0])) replaced = true;
                 if (!replaced) fail = true;
             }
         }
