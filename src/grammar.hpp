@@ -13,13 +13,15 @@ using RHS = vector<Symbol>;
 using Productions = map<Symbol, vector<RHS>>;
 
 
-
-
 struct Grammar {
     set<Symbol> V; // nao-terminais
     set<Symbol> T; // terminais
     Symbol S; // start
     Productions P;
+
+    bool isTerminal(const Symbol &s) const {
+        return T.count(s) > 0 || s == "&";  // & representa epsilon
+    }
 };
 
 #endif

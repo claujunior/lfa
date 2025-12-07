@@ -167,12 +167,15 @@ static void remove_useless_symbols(Grammar &G, Logger &log) {
     while (changed) {
         changed = false;
         for (auto &A : G.V) {
-            if (gen.count(A)) continue;
-            if (!G.P.count(A)) continue;
-            for (auto &rhs : G.P[A]) {
+            if (gen.count(A)) continue; // A já é gerador
+            if (!G.P.count(A)) continue; // A não gera nada
+            for (auto &rhs : G.P[A]) { 
                 bool ok = true;
                 for (auto &X : rhs) {
-                    if (isNonTerminal(X) && !gen.count(X)) { ok = false; break; }
+                    if (!G.isTerminal(X) && !gen.count(X)) {
+                        ok = false;
+                        break;
+                    }
                 }
                 if (ok) { gen.insert(A); changed = true; break; }
             }
@@ -186,7 +189,7 @@ static void remove_useless_symbols(Grammar &G, Logger &log) {
         if (!gen.count(it->first)) { it = G.P.erase(it); continue; }
         auto &vec = it->second;
         vec.erase(remove_if(vec.begin(), vec.end(), [&](const RHS &r){
-            for (auto &X : r) if (isNonTerminal(X) && !gen.count(X)) return true;
+            for (auto &X : r) if (!G.isTerminal(X) && !gen.count(X)) return true;
             return false;
         }), vec.end());
         ++it;
@@ -194,7 +197,7 @@ static void remove_useless_symbols(Grammar &G, Logger &log) {
     // keep only V that are generating
     set<Symbol> newV;
     for (auto &x : gen) newV.insert(x);
-    G.V = newV;
+    G.V = newV;    
 
     // reachable from start
     set<Symbol> reach;
@@ -206,7 +209,7 @@ static void remove_useless_symbols(Grammar &G, Logger &log) {
             if (!G.P.count(A)) continue;
             for (auto &rhs : G.P[A]) {
                 for (auto &X : rhs) {
-                    if (isNonTerminal(X) && !reach.count(X)) { reach.insert(X); changed = true; }
+                    if (!G.isTerminal(X) && !reach.count(X)) { reach.insert(X); changed = true; }
                 }
             }
         }
@@ -330,6 +333,9 @@ static void to_gnf(Grammar &G, Logger &log) {
     remove_epsilon(G, log);
     remove_unit_productions(G, log);
     remove_useless_symbols(G, log);
+    replace_terminals_in_long_productions(G, log);
+
+    log.info("Início do processo prático para GNF (Greibach Normal Form - Forma Normal de Greibach).\n");
 
     // order nonterminals
     vector<Symbol> order(G.V.begin(), G.V.end());

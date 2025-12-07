@@ -233,7 +233,8 @@ string grammar_to_string(const Grammar &G) {
             else {
                 for (size_t i=0;i<rhs.size();++i) {
                     if (i) oss << " ";
-                    oss << rhs[i];
+                    if(G.isTerminal(rhs[i])) oss << '\'' << rhs[i] << '\'';
+                    else oss << rhs[i];
                 }
             }
         }
