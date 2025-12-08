@@ -19,8 +19,8 @@ static set<Symbol> compute_nullable(const Grammar &G) {
         for (auto &A : G.V) {
             if (nullable.count(A)) continue;
             if (!G.P.count(A)) continue;
-            for (auto &rhs : G.P.at(A)) {
-                if (rhs.empty()) { nullable.insert(A); changed=true; break; }
+            for (auto &rhs : G.P.at(A)) /*precisa de at() pq é const*/ {
+                if (rhs == RHS{"&"}) { nullable.insert(A); changed=true; break; }
                 bool allnull=true;
                 for (auto &X : rhs) {
                     if (G.isTerminal(X) || !nullable.count(X)) { allnull=false; break; }
@@ -197,11 +197,14 @@ static void remove_useless_symbols(Grammar &G, Logger &log) {
     set<Symbol> reach;
     reach.insert(G.S);
     changed = true;
+
     while (changed) {
         changed = false;
         for (auto &A : vector<Symbol>(reach.begin(), reach.end())) {
             if (!G.P.count(A)) continue;
             for (auto &rhs : G.P[A]) {
+                std::cout << "Analisando produção de " << A << ": " ;
+                for (auto &s : rhs) std::cout << s << " \n";
                 for (auto &X : rhs) {
                     if (!G.isTerminal(X) && !reach.count(X)) { reach.insert(X); changed = true; }
                 }
