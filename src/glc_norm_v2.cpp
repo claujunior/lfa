@@ -334,96 +334,60 @@ static void to_gnf(Grammar &G, Logger &log) {
 
     log.info("Início do processo prático para GNF (Greibach Normal Form - Forma Normal de Greibach).\n");
 
-    // order nonterminals
-    vector<Symbol> order(G.V.begin(), G.V.end());
-    auto itS = find(order.begin(), order.end(), G.S);
-    if (itS != order.end()) rotate(order.begin(), itS, itS+1);
-    log.info("Ordem de nao-terminais usada para GNF:");
-    for (auto &x: order) log.info("  " + x);
+    std::vector<std::string> vars;
+    vars.reserve(G.P.size());
+    for (auto &p : G.P) vars.push_back(p.first);
+
+    if (vars.empty()) {
+        log.info("Nenhum não-terminal encontrado. Nada a ordenar.\n");
+        return;
+    }
+
+    // 2. Ordenar alfabeticamente (ABCD..., ou S,A,B,C se S vem primeiro)
+    std::sort(vars.begin(), vars.end());
+
+    log.info("Ordem escolhida para variáveis:");
+    for (auto &v : vars) log.info("  " + v);
+    log.info("");
+    log.snapshot("Após order_variables (GNF)", G);
 
     bool changed = true;
-    int iter = 0;
-    while (changed && iter < 2000) {
-        ++iter;
+    while (changed) {
         changed = false;
-        for (size_t i=0;i<order.size();++i) {
-            Symbol A = order[i];
-            if (!G.P.count(A)) continue;
-            vector<RHS> newRhs;
-            for (auto &rhs : G.P[A]) {
-                if (rhs.empty()) continue;
-                Symbol first = rhs[0];
-                // if first is nonterminal that appears BEFORE A in order, substitute
-                auto pos = find(order.begin(), order.begin()+i, first);
-                if (!G.isTerminal(first) && pos != order.begin()+i) {
-                    // substitute first with its productions
-                    if (!G.P.count(first)) { newRhs.push_back(rhs); continue; }
-                    for (auto &beta : G.P[first]) {
-                        RHS newr = beta;
-                        newr.insert(newr.end(), rhs.begin()+1, rhs.end());
-                        newRhs.push_back(newr);
-                    }
+
+        for (auto &p : G.P) {
+            Symbol A = p.first;
+            auto &rhs_list = p.second;
+
+            std::vector<RHS> new_list;
+
+            for (auto &rhs : rhs_list) {
+                if (rhs.empty()) {
+                    // não deveria acontecer depois da eliminação de ε, mas ignoramos
+                    new_list.push_back(rhs);
+                    continue;
+                }
+
+                Symbol X = rhs[0];
+
+                // se começa com variável, expandir
+                if (!G.isTerminal(X)) {
                     changed = true;
-                } else newRhs.push_back(rhs);
+                    for (auto &prod_of_X : G.P[X]) {
+                        RHS expanded = prod_of_X;
+                        expanded.insert(expanded.end(), rhs.begin() + 1, rhs.end());
+                        new_list.push_back(expanded);
+                    }
+                } else {
+                    new_list.push_back(rhs);
+                }
             }
-            sort(newRhs.begin(), newRhs.end());
-            newRhs.erase(unique(newRhs.begin(), newRhs.end()), newRhs.end());
-            G.P[A] = newRhs;
+
+            rhs_list = std::move(new_list);
         }
     }
-    log.info("Substituições por ordem concluídas (iterações = " + to_string(iter) + ").");
-    log.snapshot("Após substituições iniciais para GNF", G);
-
-    // Eliminar recursão esquerda por variáveis A (prático)
-    for (auto &A : order) {
-        if (!G.P.count(A)) continue;
-        vector<RHS> alpha, beta;
-        for (auto &rhs : G.P[A]) {
-            if (!rhs.empty() && rhs[0] == A) {
-                RHS tail(rhs.begin()+1, rhs.end());
-                alpha.push_back(tail);
-            } else beta.push_back(rhs);
-        }
-        if (!alpha.empty()) {
-            Symbol Aprime;
-            int k = 0;
-            do { Aprime = A + "_G" + to_string(++k); } while (G.V.count(Aprime));
-            G.V.insert(Aprime);
-            vector<RHS> newA, newAprime;
-            for (auto &b : beta) {
-                RHS nb = b;
-                nb.push_back(Aprime);
-                newA.push_back(nb);
-            }
-            for (auto &a : alpha) {
-                RHS na = a;
-                na.push_back(Aprime);
-                newAprime.push_back(na);
-            }
-            newAprime.push_back(RHS()); // epsilon
-            G.P[A] = newA;
-            G.P[Aprime] = newAprime;
-            log.info("Eliminada recursão esquerda para " + A + " introduzindo " + Aprime);
-        }
-    }
-    log.snapshot("Após eliminação de recursão à esquerda (tentaiva)", G);
-
-    // final check
-    bool fail = false;
-    for (auto &A : G.V) {
-        for (auto &rhs : G.P[A]) {
-            if (rhs.empty()) continue;
-            if (!G.isTerminal(rhs[0])) {
-                bool replaced = false;
-                for (auto &x : G.P[rhs[0]]) if (!x.empty() && G.isTerminal(x[0])) replaced = true;
-                if (!replaced) fail = true;
-            }
-        }
-    }
-    if (fail) log.info("ATENÇÃO: Não foi possível garantir que todas as produções iniciem por terminal automaticamente (caso complexo).");
-    else log.info("Todas as produções começam por terminal: GNF alcançada (prático).");
-
-    log.snapshot("Gramática pós-processada tentativa GNF", G);
+    log.snapshot("Após eliminação de prefixos variáveis (GNF)", G);
+    log.info("GNF (tentativa): etapas concluídas.");
 }
 
 int main(int argc, char** argv) {
