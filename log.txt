@@ -1,68 +1,66 @@
 ==== [Gramática original] ====
 Start: S
-A -> '0' '1' | '1' B '1'
-B -> B B A A | C '0' '1' '0' '1' | B '1' '1' | &
-C -> C '1' '0' A | B C
-S -> A '0' '1' B C | &
+A -> '0'
+B -> B C
+C -> A B | &
+S -> A B | C A
 
 
 Remoção de regras-ε: início.
 Variáveis nulas (nullable):
-  B
-  S
-Start era nullable: criado novo start 'S_S0_1' com S_S0_1->S e S_S0_1->&
+  C
 Remoção de regras-ε: finalizada.
 ==== [Após remoção de ε-productions] ====
-Start: S_S0_1
-A -> '0' '1' | '1' '1' | '1' B '1'
-B -> '1' '1' | A A | B '1' '1' | B A A | B B A A | C '0' '1' '0' '1'
-C -> B C | C '1' '0' A
-S -> A '0' '1' B C | A '0' '1' C
-S_S0_1 -> '&' | S
+Start: S
+A -> '0'
+B -> B C
+C -> A B
+S -> A | A B | C A
 
 
 Remoção de unit-productions: início.
 Remoção de unit-productions: finalizada.
 ==== [Após remoção de unit-productions] ====
-Start: S_S0_1
-A -> '0' '1' | '1' '1' | '1' B '1'
-B -> '1' '1' | A A | B '1' '1' | B A A | B B A A | C '0' '1' '0' '1'
-C -> B C | C '1' '0' A
-S -> A '0' '1' B C | A '0' '1' C
-S_S0_1 -> '&' | A '0' '1' B C | A '0' '1' C
+Start: S
+A -> '0'
+B -> B C
+C -> A B
+S -> '0' | A B | C A
 
 
 Remoção de símbolos inúteis: início.
 Geradores:
   A
-  B
-  S_S0_1
+  S
 Alcançáveis:
-  S_S0_1
+  S
 Remoção de símbolos inúteis: finalizada.
 ==== [Após remoção de símbolos inúteis] ====
-Start: S_S0_1
-S_S0_1 -> '&'
+Start: S
+S -> '0'
 
 
 Substituição de terminais em produções longas: início.
 Substituição de terminais em produções longas: finalizada.
 ==== [Após substituição de terminais em produções longas] ====
-Start: S_S0_1
-S_S0_1 -> '&'
+Start: S
+S -> '0'
 
 
-Binarização: início.
-Binarização: finalizada.
-==== [Após binarização (CNF-ready)] ====
-Start: S_S0_1
-S_S0_1 -> '&'
+Início do processo prático para GNF (Greibach Normal Form - Forma Normal de Greibach).
+
+Ordem escolhida para variáveis:
+  S
+
+==== [Após order_variables (GNF)] ====
+Start: S
+S -> '0'
 
 
-CNF: etapas concluídas.
-==== [Gramática em (aproximação de) CNF] ====
-Start: S_S0_1
-S_S0_1 -> '&'
+==== [Após eliminação de prefixos variáveis (GNF)] ====
+Start: S
+S -> '0'
 
 
-NORMALIZACAO: CNF finalizada.
+GNF (tentativa): etapas concluídas.
+NORMALIZACAO: GNF (tentativa) finalizada. Revise o log.

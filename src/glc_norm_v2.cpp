@@ -203,8 +203,6 @@ static void remove_useless_symbols(Grammar &G, Logger &log) {
         for (auto &A : vector<Symbol>(reach.begin(), reach.end())) {
             if (!G.P.count(A)) continue;
             for (auto &rhs : G.P[A]) {
-                std::cout << "Analisando produção de " << A << ": " ;
-                for (auto &s : rhs) std::cout << s << " \n";
                 for (auto &X : rhs) {
                     if (!G.isTerminal(X) && !reach.count(X)) { reach.insert(X); changed = true; }
                 }
@@ -346,6 +344,13 @@ static void to_gnf(Grammar &G, Logger &log) {
     // 2. Ordenar alfabeticamente (ABCD..., ou S,A,B,C se S vem primeiro)
     std::sort(vars.begin(), vars.end());
 
+    std::map<std::string, int> order_index;
+    int cnt = 0;
+    for(auto& v : vars) {
+        order_index[v] = cnt++;
+    }
+
+
     log.info("Ordem escolhida para variáveis:");
     for (auto &v : vars) log.info("  " + v);
     log.info("");
@@ -354,26 +359,28 @@ static void to_gnf(Grammar &G, Logger &log) {
     bool changed = true;
     while (changed) {
         changed = false;
-
+        
         for (auto &p : G.P) {
             Symbol A = p.first;
             auto &rhs_list = p.second;
-
+            
             std::vector<RHS> new_list;
-
             for (auto &rhs : rhs_list) {
-                if (rhs.empty()) {
-                    // não deveria acontecer depois da eliminação de ε, mas ignoramos
-                    new_list.push_back(rhs);
+
+                Symbol X = rhs[0];
+                
+                
+                if(G.P.count(X) && G.P.at(X).size() == 1 && G.isTerminal(G.P.at(X)[0][0]) ) {
+                    RHS expanded = G.P.at(X)[0];
+                    expanded.insert(expanded.end(), rhs.begin() + 1, rhs.end());
+                    new_list.push_back(expanded);
                     continue;
                 }
 
-                Symbol X = rhs[0];
-
                 // se começa com variável, expandir
-                if (!G.isTerminal(X)) {
+                if (!G.isTerminal(X) && order_index[X] < order_index[A]) {
                     changed = true;
-                    for (auto &prod_of_X : G.P[X]) {
+                    for (RHS &prod_of_X : G.P[X]) {
                         RHS expanded = prod_of_X;
                         expanded.insert(expanded.end(), rhs.begin() + 1, rhs.end());
                         new_list.push_back(expanded);
